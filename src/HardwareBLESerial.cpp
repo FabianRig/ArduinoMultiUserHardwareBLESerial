@@ -15,12 +15,26 @@ bool HardwareBLESerial::beginAndSetupBLE(const char *name) {
   return true;
 }
 
+void ConnectHandler(BLEDevice central) {
+  Serial.print("Connected event, central: ");
+  Serial.println(central.address());
+  BLE.advertise();
+}
+
+void DisconnectHandler(BLEDevice central) {
+  Serial.print("Disconnected event, central: ");
+  Serial.println(central.address());
+  BLE.advertise();
+}
+
 void HardwareBLESerial::begin() {
   BLE.setAdvertisedService(uartService);
   uartService.addCharacteristic(receiveCharacteristic);
   uartService.addCharacteristic(transmitCharacteristic);
   receiveCharacteristic.setEventHandler(BLEWritten, HardwareBLESerial::onBLEWritten);
   BLE.addService(uartService);
+  BLE.setEventHandler(BLEConnected, ConnectHandler);
+  BLE.setEventHandler(BLEDisconnected, DisconnectHandler);
 }
 
 void HardwareBLESerial::poll() {
